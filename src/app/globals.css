@@ -1,7 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@theme {
+  --color-primary: #4f46e5;
+  --color-background: #020617;
+  --color-foreground: #e2e8f0;
+  --color-accent: #10b981;
+}
+
+/* Base custom properties */
 :root {
   color-scheme: dark;
   --ft-bg: #020617;
@@ -18,7 +24,7 @@ body {
   -webkit-font-smoothing: antialiased;
   background-image: radial-gradient(
     1200px 700px at 80% -10%,
-    rgba(99, 102, 241, 0.12),
+    rgba(79, 70, 229, 0.15),
     transparent 60%
   );
 }

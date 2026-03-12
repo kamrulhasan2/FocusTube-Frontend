@@ -6,7 +6,7 @@ export const CONFIG = {
     baseUrl: API_BASE_URL,
   },
   storageKeys: {
-    authToken: "focustube_token",
+    authToken:  process.env.NEXT_STORAGE_KEY || "focustube_token",
   },
 } as const;
 

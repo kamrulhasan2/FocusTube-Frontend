@@ -19,12 +19,18 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
+    // Handle Global Errors
+    const defaultMessage = "Something went wrong";
+    const data = error.response?.data as { message?: string };
+    const errorMessage = data?.message || defaultMessage;
+
     if (typeof window !== "undefined") {
       const status = error.response?.status;
       if (status === 401) {
         window.localStorage.removeItem(CONFIG.storageKeys.authToken);
+        window.location.href = "/login";
       }
     }
-    return Promise.reject(error);
+    return Promise.reject({ ...error, message: errorMessage });
   },
 );

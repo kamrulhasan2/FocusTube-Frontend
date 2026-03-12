@@ -9,7 +9,7 @@ const config: Config = {
       colors: {
         slate: colors.slate,
         zinc: colors.zinc,
-        primary: "#6366f1",
+        primary: "#4f46e5",
         background: "#020617",
         foreground: "#e2e8f0",
         accent: "#10b981",
