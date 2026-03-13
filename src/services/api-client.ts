@@ -1,5 +1,9 @@
 import axios, { AxiosError } from "axios";
+import Cookies from "js-cookie";
 import { CONFIG } from "@/config/configEnv";
+import { useAuthStore } from "@/store/use-auth-store";
+
+const AUTH_COOKIE_NAME = CONFIG.auth.cookieName;
 
 export const apiClient = axios.create({
   baseURL: CONFIG.api.baseUrl,
@@ -7,11 +11,14 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = window.localStorage.getItem(CONFIG.storageKeys.authToken);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  if (typeof window === "undefined") return config;
+
+  const storeToken = useAuthStore.getState().token;
+  const cookieToken = Cookies.get(AUTH_COOKIE_NAME);
+  const token = storeToken || cookieToken;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -27,7 +34,7 @@ apiClient.interceptors.response.use(
     if (typeof window !== "undefined") {
       const status = error.response?.status;
       if (status === 401) {
-        window.localStorage.removeItem(CONFIG.storageKeys.authToken);
+        useAuthStore.getState().clearAuth();
         window.location.href = "/login";
       }
     }
