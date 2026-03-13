@@ -1,35 +1,78 @@
 import { create } from "zustand";
-import { CONFIG } from "@/config/configEnv";
+import { createJSONStorage, persist } from "zustand/middleware";
+import Cookies from "js-cookie";
 
 type AuthUser = {
   id: string;
   name?: string;
   email?: string;
-  avatarUrl?: string;
+  avatar?: string | null;
 };
 
 type AuthState = {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  setAuth: (payload: { user: AuthUser; token: string }) => void;
+  isHydrated: boolean;
+  setAuth: (user: AuthUser, token: string) => void;
   clearAuth: () => void;
+  hydrateAuth: () => void;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  setAuth: ({ user, token }) => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(CONFIG.storageKeys.authToken, token);
-    }
-    set({ user, token, isAuthenticated: true });
-  },
-  clearAuth: () => {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(CONFIG.storageKeys.authToken);
-    }
-    set({ user: null, token: null, isAuthenticated: false });
-  },
-}));
+const AUTH_COOKIE_NAME = "focustube_token";
+
+const getSecureCookieFlag = () => {
+  if (typeof window === "undefined") return true;
+  return window.location.protocol === "https:";
+};
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isHydrated: false,
+      setAuth: (user, token) => {
+        Cookies.set(AUTH_COOKIE_NAME, token, {
+          sameSite: "strict",
+          secure: getSecureCookieFlag(),
+        });
+        set({ user, token, isAuthenticated: true });
+      },
+      clearAuth: () => {
+        Cookies.remove(AUTH_COOKIE_NAME);
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isHydrated: true,
+        });
+      },
+      hydrateAuth: () => {
+        set({ isHydrated: true });
+      },
+    }),
+    {
+      name: "focustube-auth",
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
+      storage:
+        typeof window !== "undefined"
+          ? createJSONStorage(() => localStorage)
+          : undefined,
+      onRehydrateStorage: () => (state) => {
+        if (state?.token) {
+          Cookies.set(AUTH_COOKIE_NAME, state.token, {
+            sameSite: "strict",
+            secure: getSecureCookieFlag(),
+          });
+        }
+        state?.hydrateAuth();
+      },
+    },
+  ),
+);

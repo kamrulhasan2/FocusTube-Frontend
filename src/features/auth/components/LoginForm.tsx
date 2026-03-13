@@ -9,7 +9,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 import { LoginSchema } from "../types/auth.schema";
-import { useAuth } from "../hooks/useAuth";
+import { useLoginMutation } from "../hooks/use-auth-mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +27,7 @@ import {
  */
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading } = useAuth();
+  const loginMutation = useLoginMutation();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -35,7 +35,7 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
-    await login(values);
+    await loginMutation.mutateAsync(values);
   };
 
   return (
@@ -111,9 +111,9 @@ export function LoginForm() {
           <Button
             type="submit"
             className="w-full cursor-pointer"
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
           >
-            {isLoading ? (
+            {loginMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : null}
             Sign In

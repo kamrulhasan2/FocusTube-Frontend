@@ -9,7 +9,7 @@ import { Eye, EyeOff, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 
 import { RegisterSchema } from "../types/auth.schema";
-import { useAuth } from "../hooks/useAuth";
+import { useRegisterMutation } from "../hooks/use-auth-mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register, isLoading } = useAuth();
+  const registerMutation = useRegisterMutation();
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -36,7 +36,7 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
-    await register(values);
+    await registerMutation.mutateAsync(values);
   };
 
   const passwordValue = form.watch("password");
@@ -207,9 +207,9 @@ export function RegisterForm() {
           <Button
             type="submit"
             className="w-full mt-6 cursor-pointer"
-            disabled={isLoading}
+            disabled={registerMutation.isPending}
           >
-            {isLoading ? (
+            {registerMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : null}
             Create Account
