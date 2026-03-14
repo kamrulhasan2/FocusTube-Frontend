@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { Sidebar } from "./Sidebar";
 import { Navbar } from "./Navbar";
+import { DevDebugPanelClient } from "@/components/shared/DevDebugPanelClient";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -17,6 +18,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
       </div>
+      <DevDebugPanelClient />
     </div>
   );
 }

@@ -21,6 +21,8 @@ type AuthState = {
 };
 
 const AUTH_COOKIE_NAME = CONFIG.auth.cookieName || "focustube-auth-token";
+const AUTH_STORAGE_KEY = CONFIG.storageKeys.authToken || "focustube_token";
+const AUTH_STATE_KEY = CONFIG.storageKeys.authState || "focustube-auth";
 
 const getSecureCookieFlag = () => {
   if (typeof window === "undefined") return true;
@@ -39,10 +41,16 @@ export const useAuthStore = create<AuthState>()(
           sameSite: "strict",
           secure: getSecureCookieFlag(),
         });
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(AUTH_STORAGE_KEY, token);
+        }
         set({ user, token, isAuthenticated: true });
       },
       clearAuth: () => {
         Cookies.remove(AUTH_COOKIE_NAME);
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
         set({
           user: null,
           token: null,
@@ -55,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "focustube-auth",
+      name: AUTH_STATE_KEY,
       partialize: (state) => ({
         user: state.user,
         token: state.token,
