@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import Cookies from "js-cookie";
+import { CONFIG } from "@/config/configEnv";
 
 type AuthUser = {
   id: string;
@@ -19,7 +20,7 @@ type AuthState = {
   hydrateAuth: () => void;
 };
 
-const AUTH_COOKIE_NAME = "focustube_token";
+const AUTH_COOKIE_NAME = CONFIG.auth.cookieName || "focustube-auth-token";
 
 const getSecureCookieFlag = () => {
   if (typeof window === "undefined") return true;
