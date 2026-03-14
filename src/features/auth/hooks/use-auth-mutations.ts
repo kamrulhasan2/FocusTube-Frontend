@@ -15,7 +15,10 @@ type AuthResponse = {
     email?: string;
     avatar?: string | null;
   };
-  token: string;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
 };
 
 type AuthErrorResponse = {
@@ -38,7 +41,11 @@ export const useRegisterMutation = () => {
   return useMutation<AuthResponse, unknown, z.infer<typeof RegisterSchema>>({
     mutationFn: async (values) => AuthAPI.register(values),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
+      if (!data?.user || !data?.tokens?.accessToken) {
+        toast.error("Authentication failed. Please try again.");
+        return;
+      }
+      setAuth(data.user, data.tokens.accessToken);
       toast.success("Registration successful");
       router.replace("/dashboard");
     },
@@ -55,7 +62,11 @@ export const useLoginMutation = () => {
   return useMutation<AuthResponse, unknown, z.infer<typeof LoginSchema>>({
     mutationFn: async (values) => AuthAPI.login(values),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
+      if (!data?.user || !data?.tokens?.accessToken) {
+        toast.error("Authentication failed. Please try again.");
+        return;
+      }
+      setAuth(data.user, data.tokens.accessToken);
       toast.success("Welcome back");
       router.replace("/dashboard");
     },
