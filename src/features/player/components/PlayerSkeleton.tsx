@@ -17,7 +17,7 @@ export function PlayerSkeleton() {
       </div>
       <div className="space-y-3">
         <Skeleton className="h-5 w-24 rounded-md bg-slate-900/60" />
-        <Skeleton className="h-[520px] w-full rounded-xl bg-slate-900/60" />
+        <Skeleton className="h-130 w-full rounded-xl bg-slate-900/60" />
       </div>
     </div>
   )

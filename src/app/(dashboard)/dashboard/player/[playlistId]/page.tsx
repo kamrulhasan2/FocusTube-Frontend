@@ -101,9 +101,9 @@ export default function PlayerPage() {
   if (!playlist) return null
 
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-6 overflow-x-hidden xl:grid-cols-[3fr_1fr]">
+    <div className="grid min-w-0 grid-cols-1 gap-6 overflow-x-hidden lg:grid-cols-[3fr_1fr]">
       <div className="min-w-0 space-y-6">
-        <div className="sticky top-16 z-10 xl:static">
+        <div className="sticky top-16 z-10 lg:static">
           <VideoPlayer
             video={activeVideo}
             hasPrevious={hasPrevious}
@@ -114,13 +114,19 @@ export default function PlayerPage() {
         </div>
 
         <Tabs
-          defaultValue="overview"
-          className="rounded-xl border border-slate-800 bg-slate-900 p-6"
+          defaultValue="notes"
+          className="rounded-xl border border-slate-800 bg-slate-900 mt-16 p-4 md:p-6"
         >
-          <TabsList className="bg-slate-900">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
-            <TabsTrigger value="summary">AI Summary</TabsTrigger>
+          <TabsList className="w-full flex-wrap justify-start gap-2 bg-slate-900">
+            <TabsTrigger value="overview" className="flex-1">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="flex-1">
+              Notes
+            </TabsTrigger>
+            <TabsTrigger value="summary" className="flex-1">
+              AI Summary
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="mt-4 space-y-4">
             <div>

@@ -33,9 +33,6 @@ export function VideoPlayer({
     return video.id
   }, [video])
 
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : undefined
-
   useEffect(() => {
     return () => {
       if (progressTimerRef.current) {
@@ -43,6 +40,12 @@ export function VideoPlayer({
       }
     }
   }, [])
+
+  const handleProgressTick = (currentSeconds: number) => {
+    // TODO (Phase 11): Send progress to PATCH /library/progress
+    // e.g. LibraryService.updateProgress({ video_id, playlist_id, watched_second })
+    void currentSeconds
+  }
 
   if (!video) {
     return (
@@ -74,12 +77,11 @@ export function VideoPlayer({
             width: "100%",
             height: "100%",
             playerVars: {
-              autoplay: 1,
+              autoplay: 0,
               controls: 1,
               rel: 0,
               modestbranding: 1,
               playsinline: 1,
-              origin,
             },
           }}
           onReady={(event) => {
@@ -102,7 +104,7 @@ export function VideoPlayer({
               progressTimerRef.current = window.setInterval(() => {
                 const current = playerRef.current?.getCurrentTime()
                 if (typeof current === "number") {
-                  console.log(current)
+                  handleProgressTick(current)
                 }
               }, 1000)
             } else {

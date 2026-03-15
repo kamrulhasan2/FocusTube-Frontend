@@ -16,7 +16,7 @@ export function LessonList({ videos, activeVideoId, onSelect }: LessonListProps)
         <h3 className="text-sm font-semibold text-slate-200">Lessons</h3>
         <span className="text-xs text-slate-500">{videos.length} videos</span>
       </div>
-      <div className="mt-4 max-h-[50vh] flex-1 space-y-2 overflow-y-auto pr-2 xl:max-h-[70vh]">
+      <div className="mt-4 max-h-[45vh] flex-1 space-y-2 overflow-y-auto pr-2 sm:max-h-[55vh] lg:max-h-[70vh]">
         {videos.map((video) => (
           <LessonItem
             key={video.id}

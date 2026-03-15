@@ -47,6 +47,12 @@ const SheetContent = React.forwardRef<
       )}
       {...props}
     >
+      <DialogPrimitive.Title className="sr-only">
+        Navigation menu
+      </DialogPrimitive.Title>
+      <DialogPrimitive.Description className="sr-only">
+        Use the menu to navigate FocusTube sections.
+      </DialogPrimitive.Description>
       {children}
       <SheetClose className="absolute right-4 top-4 rounded-sm text-slate-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600">
         <X className="h-4 w-4" />

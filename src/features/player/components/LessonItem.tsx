@@ -74,7 +74,7 @@ export const LessonItem = memo(function LessonItem({
         isActive && "border-indigo-600 bg-indigo-600/10"
       )}
     >
-      <div className="relative h-12 w-20 flex-shrink-0 overflow-hidden rounded-md bg-slate-800">
+      <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-md bg-slate-800">
         {thumbnailUrl ? (
           <Image
             src={thumbnailUrl}
