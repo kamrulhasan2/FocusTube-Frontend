@@ -3,14 +3,22 @@ const API_BASE_URL =
 
 export const CONFIG = {
   auth: {
-    cookieName: process.env.NEXT_AUTH_COOKIE_NAME || "focustube_token",
+    cookieName:
+      process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME ||
+      process.env.NEXT_AUTH_COOKIE_NAME ||
+      "focustube_token",
   },
 
   api: {
     baseUrl: API_BASE_URL,
   },
   storageKeys: {
-    authToken:  process.env.NEXT_STORAGE_KEY || "focustube_token",
+    authToken:
+      process.env.NEXT_PUBLIC_AUTH_TOKEN_STORAGE_KEY ||
+      process.env.NEXT_STORAGE_KEY ||
+      "focustube_token",
+    authState:
+      process.env.NEXT_PUBLIC_AUTH_STATE_STORAGE_KEY || "focustube-auth",
   },
 } as const;
 

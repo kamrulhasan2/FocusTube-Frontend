@@ -1,8 +1,20 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
-import { PlayCircle } from "lucide-react"
+import { PlayCircle, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Progress } from "@/components/ui/progress"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -50,6 +62,57 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
         )}
       >
         <div className="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-950/70">
+          <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-slate-950/80 text-slate-200 hover:bg-slate-900"
+                  aria-label="Delete playlist"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    toast.info("Delete is not available yet.")
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-rose-400" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                aria-label="Delete playlist confirmation"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <DialogHeader>
+                  <DialogTitle>Delete playlist?</DialogTitle>
+                  <DialogDescription>
+                    This action will be available once the delete API is ready.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      toast.info("Delete is not available yet.")
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="relative w-full pb-[56.25%]">
             {thumbnailUrl ? (
               <Image
@@ -66,7 +129,7 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
             )}
           </div>
 
-          <div className="absolute right-3 top-3 rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-xs font-medium text-slate-200">
+          <div className="absolute left-3 top-3 rounded-full border border-slate-700 bg-slate-950/80 px-3 py-1 text-xs font-medium text-slate-200">
             {playlist.total_videos} Videos
           </div>
         </div>
