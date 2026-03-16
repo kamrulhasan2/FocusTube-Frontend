@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { MobileSidebar } from "./MobileSidebar";
+import { DrawerSidebar } from "./DrawerSidebar";
 import { UserNav } from "./UserNav";
 
 const breadcrumbLabels: Record<string, string> = {
@@ -41,7 +41,7 @@ export function Navbar() {
     <header className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur-md">
       <div className="flex items-center justify-between gap-4 px-4 py-3 md:px-6">
         <div className="flex items-center gap-3">
-          <MobileSidebar />
+          <DrawerSidebar />
           <nav aria-label="Breadcrumb" className="max-w-[55vw]">
             <ol className="flex items-center gap-2 text-sm text-slate-400 overflow-hidden">
               {breadcrumbs.map((crumb, index) => (
