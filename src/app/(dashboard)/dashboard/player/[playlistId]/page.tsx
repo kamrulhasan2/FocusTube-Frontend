@@ -11,8 +11,6 @@ import { VideoPlayer } from "@/features/player/components/VideoPlayer"
 import { usePlaylistDetail } from "@/features/player/hooks/use-playlist-detail"
 import { NoteEditor } from "@/features/notes/components/NoteEditor"
 import { NoteList } from "@/features/notes/components/NoteList"
-import { useNotes } from "@/features/notes/hooks/use-notes"
-import type { Note } from "@/features/notes/types/note.types"
 import type { PlayerHandle } from "@/features/player/types/player.types"
 
 export default function PlayerPage() {
@@ -22,9 +20,7 @@ export default function PlayerPage() {
   const playlistId = params?.playlistId
   const currentVideoId = searchParams.get("v") || undefined
   const playerRef = useRef<PlayerHandle | null>(null)
-  const { notes, addNote, updateNote, deleteNote } = useNotes()
   const [isEditorOpen, setIsEditorOpen] = useState(false)
-  const [editingNote, setEditingNote] = useState<Note | null>(null)
 
   const { playlist, videos, isLoading, isError, refetch, errorMessage } =
     usePlaylistDetail(playlistId)
@@ -85,19 +81,10 @@ export default function PlayerPage() {
   }, [activeIndex, hasNext, videos, handleSelectVideo])
 
   const handleCreateRequest = useCallback(() => {
-    setEditingNote(null)
-    setIsEditorOpen(true)
-  }, [])
-
-  const handleEditRequest = useCallback((note: Note) => {
-    setEditingNote(note)
     setIsEditorOpen(true)
   }, [])
 
   const handleCloseEditor = useCallback((open: boolean) => {
-    if (!open) {
-      setEditingNote(null)
-    }
     setIsEditorOpen(open)
   }, [])
 
@@ -182,18 +169,13 @@ export default function PlayerPage() {
               isOpen={isEditorOpen}
               onOpenChange={handleCloseEditor}
               videoId={activeVideoKey}
+              playlistId={playlist.id}
               playerRef={playerRef}
-              editingNote={editingNote}
-              onSave={addNote}
-              onUpdate={updateNote}
             />
             <div className="max-h-[50vh] overflow-y-auto pr-1 md:max-h-[60vh]">
               <NoteList
-                notes={notes}
-                activeVideoId={activeVideoKey}
+                videoId={activeVideoKey}
                 playerRef={playerRef}
-                onEdit={handleEditRequest}
-                onDelete={deleteNote}
                 onCreate={handleCreateRequest}
               />
             </div>

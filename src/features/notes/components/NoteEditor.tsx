@@ -10,9 +10,11 @@ import {
 import MDEditor, { commands } from "@uiw/react-md-editor"
 import { Clock, Eye, PenLine, Plus, X } from "lucide-react"
 
+import { toast } from "sonner"
+
 import { Button } from "@/components/ui/button"
-import { noteSchema } from "../schemas/note.schema"
-import type { Note } from "../types/note.types"
+import { useCreateNote } from "../hooks/use-note-mutations"
+import { noteSchema, noteTitleSchema } from "../schemas/note.schema"
 import type { PlayerHandle } from "@/features/player/types/player.types"
 
 import "@uiw/react-md-editor/markdown-editor.css"
@@ -21,10 +23,8 @@ type NoteEditorProps = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   videoId?: string
+  playlistId?: string
   playerRef?: MutableRefObject<PlayerHandle | null>
-  editingNote?: Note | null
-  onSave: (note: Note) => void
-  onUpdate: (id: string, content: string) => void
 }
 
 const formatTimestamp = (seconds: number) => {
@@ -37,17 +37,16 @@ export function NoteEditor({
   isOpen,
   onOpenChange,
   videoId,
+  playlistId,
   playerRef,
-  editingNote,
-  onSave,
-  onUpdate,
 }: NoteEditorProps) {
+  const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [timestamp, setTimestamp] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [titleError, setTitleError] = useState<string | null>(null)
   const [previewMode, setPreviewMode] = useState<"edit" | "live">("edit")
-
-  const isEditing = Boolean(editingNote)
+  const { mutate: createNote, isPending: isCreating } = useCreateNote(videoId)
 
   const captureTimestamp = useCallback(() => {
     const currentTime = playerRef?.current?.getCurrentTime?.()
@@ -61,8 +60,10 @@ export function NoteEditor({
 
   useEffect(() => {
     if (!isOpen) {
+      setTitle("")
       setContent("")
       setError(null)
+      setTitleError(null)
       setPreviewMode("edit")
       setTimestamp(0)
       return
@@ -70,14 +71,8 @@ export function NoteEditor({
 
     playerRef?.current?.pauseVideo?.()
 
-    if (editingNote) {
-      setContent(editingNote.content)
-      setTimestamp(editingNote.timestamp)
-      return
-    }
-
     captureTimestamp()
-  }, [isOpen, editingNote, captureTimestamp, playerRef])
+  }, [isOpen, captureTimestamp, playerRef])
 
   const handleOpen = () => {
     onOpenChange(true)
@@ -97,38 +92,42 @@ export function NoteEditor({
 
   const handleSave = useCallback(() => {
     setError(null)
+    setTitleError(null)
+    if (!videoId || !playlistId) {
+      toast.error("Select a playlist video before saving a note.")
+      return
+    }
+    const titlePayload = title.trim()
+    const titleValidation = noteTitleSchema.safeParse(titlePayload)
+    if (!titleValidation.success) {
+      setTitleError(
+        titleValidation.error.issues[0]?.message ?? "Title is required."
+      )
+      return
+    }
     const payload = content.trim()
     const validation = noteSchema.safeParse(payload)
     if (!validation.success) {
       setError(validation.error.issues[0]?.message ?? "Note content is invalid.")
       return
     }
-
-    if (isEditing && editingNote) {
-      onUpdate(editingNote.id, payload)
-      onOpenChange(false)
-      return
-    }
-
     const noteTimestamp = captureTimestamp()
-    const now = new Date().toISOString()
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      videoId: videoId || "unknown",
+    createNote({
+      title: titlePayload,
       content: payload,
-      timestamp: noteTimestamp,
-      createdAt: now,
-    }
-    onSave(newNote)
+      timestamp_in_seconds: noteTimestamp,
+      video_id: videoId,
+      playlist_id: playlistId,
+    })
+    setTitle("")
     setContent("")
     onOpenChange(false)
   }, [
     content,
-    editingNote,
-    isEditing,
+    createNote,
     onOpenChange,
-    onSave,
-    onUpdate,
+    playlistId,
+    title,
     videoId,
     captureTimestamp,
   ])
@@ -199,7 +198,22 @@ export function NoteEditor({
 
       {isOpen ? (
         <div className="mt-4 space-y-4">
-          <div data-color-mode="dark">
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                Note Title
+              </label>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className="mt-2 w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none"
+                placeholder="Key takeaway or concept"
+              />
+              {titleError ? (
+                <p className="mt-1 text-xs text-rose-400">{titleError}</p>
+              ) : null}
+            </div>
+            <div data-color-mode="dark">
             <MDEditor
               value={content}
               onChange={(value) => setContent(value ?? "")}
@@ -214,6 +228,7 @@ export function NoteEditor({
                 placeholder: "Capture your learning insight in markdown...",
               }}
             />
+            </div>
           </div>
 
           {error ? <p className="text-xs text-rose-400">{error}</p> : null}
@@ -231,8 +246,12 @@ export function NoteEditor({
                 <X className="mr-1 h-4 w-4" />
                 Cancel
               </Button>
-              <Button className="gap-1" onClick={handleSave}>
-                {isEditing ? "Update Note" : "Save Note"}
+              <Button
+                className="gap-1"
+                onClick={handleSave}
+                disabled={isCreating || !videoId || !playlistId}
+              >
+                {isCreating ? "Saving..." : "Save Note"}
               </Button>
             </div>
           </div>
