@@ -52,3 +52,9 @@ export interface PlaylistApi {
   channelTitle: string
   videos?: PlaylistApiVideo[]
 }
+
+export type PlayerHandle = {
+  getCurrentTime?: () => number
+  pauseVideo?: () => void
+  seekTo?: (seconds: number, allowSeekAhead?: boolean) => void
+}

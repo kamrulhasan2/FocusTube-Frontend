@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,11 @@ import { PlayerSkeleton } from "@/features/player/components/PlayerSkeleton"
 import { LessonList } from "@/features/player/components/LessonList"
 import { VideoPlayer } from "@/features/player/components/VideoPlayer"
 import { usePlaylistDetail } from "@/features/player/hooks/use-playlist-detail"
+import { NoteEditor } from "@/features/notes/components/NoteEditor"
+import { NoteList } from "@/features/notes/components/NoteList"
+import { useNotes } from "@/features/notes/hooks/use-notes"
+import type { Note } from "@/features/notes/types/note.types"
+import type { PlayerHandle } from "@/features/player/types/player.types"
 
 export default function PlayerPage() {
   const router = useRouter()
@@ -16,6 +21,10 @@ export default function PlayerPage() {
   const params = useParams<{ playlistId?: string }>()
   const playlistId = params?.playlistId
   const currentVideoId = searchParams.get("v") || undefined
+  const playerRef = useRef<PlayerHandle | null>(null)
+  const { notes, addNote, updateNote, deleteNote } = useNotes()
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [editingNote, setEditingNote] = useState<Note | null>(null)
 
   const { playlist, videos, isLoading, isError, refetch, errorMessage } =
     usePlaylistDetail(playlistId)
@@ -43,6 +52,10 @@ export default function PlayerPage() {
 
   const hasPrevious = activeIndex > 0
   const hasNext = activeIndex >= 0 && activeIndex < videos.length - 1
+  const activeVideoKey = useMemo(() => {
+    if (!activeVideo) return undefined
+    return activeVideo.youtubeVideoId || activeVideo.id
+  }, [activeVideo])
 
   const handleSelectVideo = useCallback(
     (videoId: string) => {
@@ -70,6 +83,23 @@ export default function PlayerPage() {
       handleSelectVideo(next.id)
     }
   }, [activeIndex, hasNext, videos, handleSelectVideo])
+
+  const handleCreateRequest = useCallback(() => {
+    setEditingNote(null)
+    setIsEditorOpen(true)
+  }, [])
+
+  const handleEditRequest = useCallback((note: Note) => {
+    setEditingNote(note)
+    setIsEditorOpen(true)
+  }, [])
+
+  const handleCloseEditor = useCallback((open: boolean) => {
+    if (!open) {
+      setEditingNote(null)
+    }
+    setIsEditorOpen(open)
+  }, [])
 
   useEffect(() => {
     if (!currentVideoId && videos[0]?.id) {
@@ -110,6 +140,7 @@ export default function PlayerPage() {
             hasNext={hasNext}
             onPrevious={handlePrevious}
             onNext={handleNext}
+            playerRef={playerRef}
           />
         </div>
 
@@ -146,8 +177,26 @@ export default function PlayerPage() {
               </p>
             </div>
           </TabsContent>
-          <TabsContent value="notes" className="mt-4 text-sm text-slate-400">
-            Notes workspace will arrive in Phase 8.
+          <TabsContent value="notes" className="mt-4 space-y-4">
+            <NoteEditor
+              isOpen={isEditorOpen}
+              onOpenChange={handleCloseEditor}
+              videoId={activeVideoKey}
+              playerRef={playerRef}
+              editingNote={editingNote}
+              onSave={addNote}
+              onUpdate={updateNote}
+            />
+            <div className="max-h-[50vh] overflow-y-auto pr-1 md:max-h-[60vh]">
+              <NoteList
+                notes={notes}
+                activeVideoId={activeVideoKey}
+                playerRef={playerRef}
+                onEdit={handleEditRequest}
+                onDelete={deleteNote}
+                onCreate={handleCreateRequest}
+              />
+            </div>
           </TabsContent>
           <TabsContent value="summary" className="mt-4 text-sm text-slate-400">
             AI summary will arrive in Phase 10.
