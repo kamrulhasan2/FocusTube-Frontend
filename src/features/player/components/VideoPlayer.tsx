@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react"
 import YouTube from "react-youtube"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-import type { Video } from "../types/player.types"
+import type { PlayerHandle, Video } from "../types/player.types"
 
 type VideoPlayerProps = {
   video?: Video
@@ -14,6 +14,7 @@ type VideoPlayerProps = {
   hasNext: boolean
   onPrevious: () => void
   onNext: () => void
+  playerRef?: MutableRefObject<PlayerHandle | null>
 }
 
 export function VideoPlayer({
@@ -22,9 +23,11 @@ export function VideoPlayer({
   hasNext,
   onPrevious,
   onNext,
+  playerRef,
 }: VideoPlayerProps) {
   const [playerError, setPlayerError] = useState<string | null>(null)
-  const playerRef = useRef<{ getCurrentTime: () => number } | null>(null)
+  const internalPlayerRef = useRef<PlayerHandle | null>(null)
+  const activePlayerRef = playerRef ?? internalPlayerRef
   const progressTimerRef = useRef<number | null>(null)
   const playableId = useMemo(() => {
     if (!video) return ""
@@ -86,7 +89,7 @@ export function VideoPlayer({
           }}
           onReady={(event) => {
             setPlayerError(null)
-            playerRef.current = event.target
+            activePlayerRef.current = event.target
           }}
           onError={(event) => {
             const message =
@@ -102,7 +105,7 @@ export function VideoPlayer({
                 window.clearInterval(progressTimerRef.current)
               }
               progressTimerRef.current = window.setInterval(() => {
-                const current = playerRef.current?.getCurrentTime()
+                const current = activePlayerRef.current?.getCurrentTime?.()
                 if (typeof current === "number") {
                   handleProgressTick(current)
                 }
