@@ -9,6 +9,8 @@ import type {
   Video,
 } from "../types/player.types"
 
+type PlaylistApiVideo = NonNullable<PlaylistApi["videos"]>[number]
+
 const resolveThumbnail = (source: ThumbnailSource | undefined) => {
   if (!source) return undefined
   if (typeof source === "string") return { url: source }
@@ -26,7 +28,7 @@ const normalizeThumbnails = (thumbnails?: ThumbnailSet): ThumbnailSet => ({
   maxres: resolveThumbnail(thumbnails?.maxres),
 })
 
-const normalizeVideo = (video: PlaylistApi["videos"][number]): Video => ({
+const normalizeVideo = (video: PlaylistApiVideo): Video => ({
   id: video._id || video.id || video.youtubeVideoId || "",
   youtubeVideoId: video.youtubeVideoId,
   title: video.title,
@@ -34,6 +36,7 @@ const normalizeVideo = (video: PlaylistApi["videos"][number]): Video => ({
   thumbnails: normalizeThumbnails(video.thumbnails),
   duration: video.duration,
   is_completed: video.is_completed,
+  aiSummary: video.aiSummary,
 })
 
 const normalizePlaylist = (playlist: PlaylistApi): Playlist => ({

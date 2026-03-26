@@ -11,6 +11,7 @@ import { VideoPlayer } from "@/features/player/components/VideoPlayer"
 import { usePlaylistDetail } from "@/features/player/hooks/use-playlist-detail"
 import { NoteEditor } from "@/features/notes/components/NoteEditor"
 import { NoteList } from "@/features/notes/components/NoteList"
+import { VideoSummary } from "@/features/video/components/VideoSummary"
 import type { PlayerHandle } from "@/features/player/types/player.types"
 
 export default function PlayerPage() {
@@ -180,8 +181,11 @@ export default function PlayerPage() {
               />
             </div>
           </TabsContent>
-          <TabsContent value="summary" className="mt-4 text-sm text-slate-400">
-            AI summary will arrive in Phase 10.
+          <TabsContent value="summary" className="mt-4">
+            <VideoSummary
+              videoId={activeVideoKey ?? ""}
+              initialSummary={activeVideo?.aiSummary}
+            />
           </TabsContent>
         </Tabs>
       </div>

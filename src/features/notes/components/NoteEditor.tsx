@@ -152,7 +152,12 @@ export function NoteEditor({
   }, [handleSave, isOpen])
 
   const toolbarCommands = useMemo(
-    () => [commands.bold, commands.italic, commands.code, commands.unorderedList],
+    () => [
+      commands.bold,
+      commands.italic,
+      commands.code,
+      commands.unorderedListCommand,
+    ],
     []
   )
 
