@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { PlayCircle } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 
@@ -23,7 +23,7 @@ export function LibraryGrid({
   isError,
   onRetry,
 }: LibraryGridProps) {
-  const gridVariants = {
+  const gridVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -31,7 +31,7 @@ export function LibraryGrid({
     },
   }
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 12, scale: 0.98 },
     show: {
       opacity: 1,
@@ -85,7 +85,7 @@ export function LibraryGrid({
             Enroll in a playlist to begin focused learning.
           </p>
           <Button asChild className="mt-5">
-            <Link href="/dashboard/search">Explore Playlists</Link>
+            <Link href="/search">Explore Playlists</Link>
           </Button>
         </div>
       </div>

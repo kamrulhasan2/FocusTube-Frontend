@@ -16,6 +16,7 @@ export interface Video {
   thumbnails: ThumbnailSet
   duration?: string
   is_completed?: boolean
+  aiSummary?: string
 }
 
 export interface Playlist {
@@ -41,6 +42,7 @@ export interface PlaylistApiVideo {
   thumbnails?: ThumbnailSet
   duration?: string
   is_completed?: boolean
+  aiSummary?: string
 }
 
 export interface PlaylistApi {

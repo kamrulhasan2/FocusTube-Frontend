@@ -153,7 +153,7 @@ export function ImportPlaylistDialog({ triggerLabel = "Import Playlist" }: Impor
                   {previewThumbnail ? (
                     <Image
                       src={previewThumbnail}
-                      alt={playlist?.title || "Playlist thumbnail"}
+                      alt={playlist?.playlist?.title || "Playlist thumbnail"}
                       fill
                       sizes="(min-width: 1024px) 420px, 90vw"
                       className="object-cover"
