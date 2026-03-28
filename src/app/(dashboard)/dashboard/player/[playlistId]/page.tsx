@@ -3,12 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlayerSkeleton } from "@/features/player/components/PlayerSkeleton"
 import { LessonList } from "@/features/player/components/LessonList"
 import { VideoPlayer } from "@/features/player/components/VideoPlayer"
 import { usePlaylistDetail } from "@/features/player/hooks/use-playlist-detail"
+import { useContinueWatching } from "@/features/library/hooks/use-continue-watching"
+import { PlaylistService } from "@/features/playlists/services/playlist.service"
+import { useVideoMetadata } from "@/features/video/hooks/use-video-metadata"
 import { NoteEditor } from "@/features/notes/components/NoteEditor"
 import { NoteList } from "@/features/notes/components/NoteList"
 import { VideoSummary } from "@/features/video/components/VideoSummary"
@@ -22,9 +26,18 @@ export default function PlayerPage() {
   const currentVideoId = searchParams.get("v") || undefined
   const playerRef = useRef<PlayerHandle | null>(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [localResume, setLocalResume] = useState<{
+    videoKey?: string
+    time?: number
+  } | null>(null)
+  const [isEnrollmentReady, setIsEnrollmentReady] = useState(false)
+  const enrollmentAttemptedRef = useRef(false)
+  const autoSelectRef = useRef(false)
 
   const { playlist, videos, isLoading, isError, refetch, errorMessage } =
     usePlaylistDetail(playlistId)
+  const { continueWatching, isLoading: isContinueLoading } =
+    useContinueWatching()
 
   const getVideoParamId = useCallback(
     (videoId: string, youtubeVideoId?: string) => youtubeVideoId || videoId,
@@ -53,6 +66,36 @@ export default function PlayerPage() {
     if (!activeVideo) return undefined
     return activeVideo.youtubeVideoId || activeVideo.id
   }, [activeVideo])
+  const { video: activeVideoMeta } = useVideoMetadata(activeVideoKey)
+  const continueWatchingForPlaylist = useMemo(() => {
+    if (!continueWatching || !playlistId) return null
+    return continueWatching.playlist_id === playlistId ? continueWatching : null
+  }, [continueWatching, playlistId])
+  const continueWatchingVideoId = useMemo(
+    () => continueWatchingForPlaylist?.video_id,
+    [continueWatchingForPlaylist]
+  )
+  const { video: continueVideo } = useVideoMetadata(continueWatchingVideoId)
+  const continueWatchingKey = useMemo(() => {
+    if (!continueWatchingForPlaylist) return undefined
+    return continueVideo?.youtubeVideoId || continueWatchingForPlaylist.video_id
+  }, [continueWatchingForPlaylist, continueVideo])
+  const serverResumeSeconds = useMemo(() => {
+    if (!activeVideo || !continueWatchingForPlaylist) return undefined
+    const matches =
+      activeVideo.mongoId === continueWatchingForPlaylist.video_id ||
+      activeVideo.id === continueWatchingForPlaylist.video_id ||
+      (continueWatchingKey &&
+        (activeVideo.youtubeVideoId === continueWatchingKey ||
+          activeVideo.id === continueWatchingKey))
+    return matches ? continueWatchingForPlaylist.last_watched_second : undefined
+  }, [activeVideo, continueWatchingForPlaylist, continueWatchingKey])
+  const nextVideoParamId = useMemo(() => {
+    if (!hasNext) return undefined
+    const nextVideo = videos[activeIndex + 1]
+    if (!nextVideo) return undefined
+    return getVideoParamId(nextVideo.id, nextVideo.youtubeVideoId)
+  }, [hasNext, videos, activeIndex, getVideoParamId])
 
   const handleSelectVideo = useCallback(
     (videoId: string) => {
@@ -90,12 +133,101 @@ export default function PlayerPage() {
   }, [])
 
   useEffect(() => {
-    if (!currentVideoId && videos[0]?.id) {
-      const first = videos[0]
-      const paramId = getVideoParamId(first.id, first.youtubeVideoId)
-      router.replace(`/dashboard/player/${playlistId}?v=${paramId}`)
+    if (autoSelectRef.current) return
+    if (!videos[0]?.id) return
+    if (currentVideoId) {
+      autoSelectRef.current = true
+      return
     }
-  }, [currentVideoId, videos, playlistId, router, getVideoParamId])
+    if (isContinueLoading) return
+
+    if (continueWatchingForPlaylist) {
+      const match = videos.find(
+        (video) =>
+          video.mongoId === continueWatchingForPlaylist.video_id ||
+          video.id === continueWatchingForPlaylist.video_id ||
+          (continueWatchingKey &&
+            (video.youtubeVideoId === continueWatchingKey ||
+              video.id === continueWatchingKey))
+      )
+      if (match) {
+        const paramId = getVideoParamId(match.id, match.youtubeVideoId)
+        router.replace(`/dashboard/player/${playlistId}?v=${paramId}`)
+        autoSelectRef.current = true
+        return
+      }
+    }
+    if (localResume?.videoKey) {
+      const match = videos.find(
+        (video) =>
+          video.youtubeVideoId === localResume.videoKey ||
+          video.id === localResume.videoKey
+      )
+      if (match) {
+        const paramId = getVideoParamId(match.id, match.youtubeVideoId)
+        router.replace(`/dashboard/player/${playlistId}?v=${paramId}`)
+        autoSelectRef.current = true
+        return
+      }
+    }
+
+    const first = videos[0]
+    const paramId = getVideoParamId(first.id, first.youtubeVideoId)
+    router.replace(`/dashboard/player/${playlistId}?v=${paramId}`)
+    autoSelectRef.current = true
+  }, [
+    currentVideoId,
+    videos,
+    playlistId,
+    router,
+    getVideoParamId,
+    continueWatchingForPlaylist,
+    continueWatchingKey,
+    localResume,
+    isContinueLoading,
+  ])
+
+  useEffect(() => {
+    if (!playlistId) {
+      setLocalResume(null)
+      return
+    }
+    try {
+      const raw = window.localStorage.getItem(
+        `focustube-playlist-last-${playlistId}`
+      )
+      if (!raw) {
+        setLocalResume(null)
+        return
+      }
+      const parsed = JSON.parse(raw) as { videoKey?: string; time?: number }
+      setLocalResume(parsed)
+    } catch {
+      setLocalResume(null)
+    }
+  }, [playlistId])
+
+  useEffect(() => {
+    if (!playlistId || enrollmentAttemptedRef.current) return
+    enrollmentAttemptedRef.current = true
+
+    const ensureEnrollment = async () => {
+      try {
+        await PlaylistService.enrollPlaylist(playlistId)
+        setIsEnrollmentReady(true)
+      } catch (error) {
+        const status = (error as { response?: { status?: number } })?.response
+          ?.status
+        if (status === 409) {
+          setIsEnrollmentReady(true)
+          return
+        }
+        setIsEnrollmentReady(false)
+      }
+    }
+
+    void ensureEnrollment()
+  }, [playlistId])
 
   if (isLoading) {
     return <PlayerSkeleton />
@@ -121,6 +253,16 @@ export default function PlayerPage() {
   return (
     <div className="grid min-w-0 grid-cols-1 gap-6 overflow-x-hidden lg:grid-cols-[3fr_1fr]">
       <div className="min-w-0 space-y-6">
+        <div className="flex items-center justify-between px-1">
+          <Button
+            variant="ghost"
+            className="gap-2 text-slate-200"
+            onClick={() => router.push("/dashboard")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
         <div className="sticky top-16 z-10 lg:static">
           <VideoPlayer
             video={activeVideo}
@@ -129,6 +271,12 @@ export default function PlayerPage() {
             onPrevious={handlePrevious}
             onNext={handleNext}
             playerRef={playerRef}
+            playlistId={playlist.id}
+            nextVideoParamId={nextVideoParamId}
+            playlistTotalVideos={videos.length}
+            serverResumeSeconds={serverResumeSeconds}
+            canSyncProgress={isEnrollmentReady && Boolean(activeVideoMeta?._id)}
+            serverVideoId={activeVideoMeta?._id}
           />
         </div>
 

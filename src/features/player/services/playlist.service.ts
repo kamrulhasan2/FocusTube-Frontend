@@ -30,6 +30,7 @@ const normalizeThumbnails = (thumbnails?: ThumbnailSet): ThumbnailSet => ({
 
 const normalizeVideo = (video: PlaylistApiVideo): Video => ({
   id: video._id || video.id || video.youtubeVideoId || "",
+  mongoId: video._id,
   youtubeVideoId: video.youtubeVideoId,
   title: video.title,
   description: video.description,

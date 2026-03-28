@@ -100,9 +100,9 @@ export function LibraryGrid({
         initial="hidden"
         animate="show"
       >
-        {playlists.map((playlist) => (
+        {playlists.map((playlist, index) => (
           <motion.div key={playlist.enrollment_id} variants={cardVariants}>
-            <PlaylistCard playlist={playlist} />
+            <PlaylistCard playlist={playlist} priorityImage={index < 4} />
           </motion.div>
         ))}
       </motion.div>

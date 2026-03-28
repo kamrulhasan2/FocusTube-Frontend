@@ -29,6 +29,14 @@ export interface LibraryPlaylistProgressItem {
   progress_percentage: number
 }
 
+export interface LibraryContinueWatchingItem {
+  video_id: string
+  playlist_id: string
+  last_watched_second: number
+  video_title: string
+  thumbnail: string
+}
+
 export interface ApiResponse<T> {
   success: boolean
   message: string
