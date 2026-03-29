@@ -10,6 +10,7 @@ export interface ThumbnailSet {
 
 export interface Video {
   id: string
+  mongoId?: string
   youtubeVideoId?: string
   title: string
   description?: string
@@ -59,4 +60,5 @@ export type PlayerHandle = {
   getCurrentTime?: () => number
   pauseVideo?: () => void
   seekTo?: (seconds: number, allowSeekAhead?: boolean) => void
+  getDuration?: () => number
 }

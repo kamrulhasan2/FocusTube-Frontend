@@ -69,9 +69,9 @@ export const LessonItem = memo(function LessonItem({
       type="button"
       onClick={() => onSelect(video.id)}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition",
+        "flex w-full items-center gap-3 rounded-lg border border-transparent border-l-4 p-3 text-left transition",
         "hover:border-slate-700 hover:bg-slate-900/70",
-        isActive && "border-indigo-600 bg-indigo-600/10"
+        isActive && "border-primary bg-primary/10"
       )}
     >
       <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-md bg-slate-800">
@@ -86,9 +86,22 @@ export const LessonItem = memo(function LessonItem({
         ) : null}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-100">
-          {video.title}
-        </p>
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "h-2 w-2 rounded-full",
+              video.is_completed
+                ? "bg-emerald-400"
+                : isActive
+                  ? "bg-primary"
+                  : "bg-slate-600"
+            )}
+            aria-hidden="true"
+          />
+          <p className="truncate text-sm font-medium text-slate-100">
+            {video.title}
+          </p>
+        </div>
         <p className="mt-1 text-xs text-slate-400">{duration}</p>
       </div>
       {video.is_completed ? (
