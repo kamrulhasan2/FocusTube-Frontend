@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
@@ -166,8 +167,15 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600/20 text-indigo-300">
-            FT
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/60 ring-1 ring-white/10">
+            <Image
+              src="/FocusTube.png"
+              alt="FocusTube logo"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-full object-contain"
+              priority
+            />
           </span>
           FocusTube
         </Link>
