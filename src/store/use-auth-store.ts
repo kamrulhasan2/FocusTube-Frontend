@@ -8,6 +8,8 @@ type AuthUser = {
   name?: string;
   email?: string;
   avatar?: string | null;
+  isPro?: boolean;
+  plan?: string;
 };
 
 type AuthState = {
@@ -38,7 +40,7 @@ export const useAuthStore = create<AuthState>()(
       isHydrated: false,
       setAuth: (user, token) => {
         Cookies.set(AUTH_COOKIE_NAME, token, {
-          sameSite: "strict",
+          sameSite: "lax",
           secure: getSecureCookieFlag(),
         });
         if (typeof window !== "undefined") {
@@ -76,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         if (state?.token) {
           Cookies.set(AUTH_COOKIE_NAME, state.token, {
-            sameSite: "strict",
+            sameSite: "lax",
             secure: getSecureCookieFlag(),
           });
         }
