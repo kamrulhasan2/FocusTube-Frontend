@@ -65,7 +65,7 @@ export const PricingTable = () => {
       {plansQuery.isLoading ? (
         <div className="grid gap-6 lg:grid-cols-2">
           {Array.from({ length: 2 }).map((_, index) => (
-            <Skeleton key={index} className="h-[420px] rounded-2xl" />
+            <Skeleton key={index} className="h-105 rounded-2xl" />
           ))}
         </div>
       ) : (
@@ -96,7 +96,7 @@ export const PricingTable = () => {
 
           <Card
             className={cn(
-              "relative overflow-hidden border-indigo-500/70 bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90 shadow-[0_0_30px_rgba(99,102,241,0.25)]",
+              "relative overflow-hidden border-indigo-500/70 bg-linear-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90 shadow-[0_0_30px_rgba(99,102,241,0.25)]",
               !proPlan && "opacity-70"
             )}
           >
