@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
+  cacheComponents: true,
   experimental: {
-    cacheComponents: true,
     optimizePackageImports: ["lucide-react"],
   },
   allowedDevOrigins: [
