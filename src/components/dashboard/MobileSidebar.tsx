@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -37,7 +38,16 @@ export function MobileSidebar() {
           className="flex h-full flex-col bg-slate-950"
         >
           <div className="flex items-center gap-2 border-b border-white/10 px-6 py-5">
-            <div className="h-2 w-2 rounded-full bg-indigo-600" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/60 ring-1 ring-white/10">
+              <Image
+                src="/FocusTube.png"
+                alt="FocusTube logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 rounded-full object-contain"
+                priority
+              />
+            </span>
             <Link href="/dashboard" className="text-lg font-semibold text-white">
               FocusTube
             </Link>
