@@ -4,7 +4,7 @@ import { ProfileSettings } from "@/features/profile/components/ProfileSettings";
 
 export default function ProfilePage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" suppressHydrationWarning>
       <div>
         <h1 className="text-2xl font-semibold text-white">Profile</h1>
         <p className="text-sm text-slate-400">
