@@ -16,6 +16,7 @@ export const usePlaylistDetail = (playlistId?: string) => {
     },
     enabled: Boolean(playlistId),
     staleTime: 5 * 60 * 1000,
+    gcTime: 1000 * 60 * 20,
     refetchOnWindowFocus: false,
   })
 

@@ -1,22 +1,70 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
+import dynamicImport from "next/dynamic"
 
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlayerSkeleton } from "@/features/player/components/PlayerSkeleton"
 import { LessonList } from "@/features/player/components/LessonList"
-import { VideoPlayer } from "@/features/player/components/VideoPlayer"
 import { usePlaylistDetail } from "@/features/player/hooks/use-playlist-detail"
 import { useContinueWatching } from "@/features/library/hooks/use-continue-watching"
 import { PlaylistService } from "@/features/playlists/services/playlist.service"
 import { useVideoMetadata } from "@/features/video/hooks/use-video-metadata"
-import { NoteEditor } from "@/features/notes/components/NoteEditor"
 import { NoteList } from "@/features/notes/components/NoteList"
-import { VideoSummary } from "@/features/video/components/VideoSummary"
 import type { PlayerHandle } from "@/features/player/types/player.types"
+
+const DynamicVideoPlayer = dynamicImport(
+  () =>
+    import("@/features/player/components/VideoPlayer").then(
+      (mod) => mod.VideoPlayer
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-90 w-full rounded-xl border border-slate-800 bg-slate-900/70">
+        <div className="flex h-full items-center justify-center text-xs text-slate-400">
+          Loading player...
+        </div>
+      </div>
+    ),
+  }
+)
+
+const DynamicNoteEditor = dynamicImport(
+  () =>
+    import("@/features/notes/components/NoteEditor").then(
+      (mod) => mod.NoteEditor
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <Skeleton className="h-6 w-1/3" />
+        <Skeleton className="mt-4 h-24 w-full" />
+      </div>
+    ),
+  }
+)
+
+const DynamicVideoSummary = dynamicImport(
+  () =>
+    import("@/features/video/components/VideoSummary").then(
+      (mod) => mod.VideoSummary
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="mt-3 h-20 w-full" />
+      </div>
+    ),
+  }
+)
 
 export default function PlayerPage() {
   const router = useRouter()
@@ -264,20 +312,22 @@ export default function PlayerPage() {
           </Button>
         </div>
         <div className="sticky top-16 z-10 lg:static">
-          <VideoPlayer
-            video={activeVideo}
-            hasPrevious={hasPrevious}
-            hasNext={hasNext}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            playerRef={playerRef}
-            playlistId={playlist.id}
-            nextVideoParamId={nextVideoParamId}
-            playlistTotalVideos={videos.length}
-            serverResumeSeconds={serverResumeSeconds}
-            canSyncProgress={isEnrollmentReady && Boolean(activeVideoMeta?._id)}
-            serverVideoId={activeVideoMeta?._id}
-          />
+          <Suspense fallback={<PlayerSkeleton />}>
+            <DynamicVideoPlayer
+              video={activeVideo}
+              hasPrevious={hasPrevious}
+              hasNext={hasNext}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              playerRef={playerRef}
+              playlistId={playlist.id}
+              nextVideoParamId={nextVideoParamId}
+              playlistTotalVideos={videos.length}
+              serverResumeSeconds={serverResumeSeconds}
+              canSyncProgress={isEnrollmentReady && Boolean(activeVideoMeta?._id)}
+              serverVideoId={activeVideoMeta?._id}
+            />
+          </Suspense>
         </div>
 
         <Tabs
@@ -314,13 +364,22 @@ export default function PlayerPage() {
             </div>
           </TabsContent>
           <TabsContent value="notes" className="mt-4 space-y-4">
-            <NoteEditor
-              isOpen={isEditorOpen}
-              onOpenChange={handleCloseEditor}
-              videoId={activeVideoKey}
-              playlistId={playlist.id}
-              playerRef={playerRef}
-            />
+            <Suspense
+              fallback={
+                <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="mt-4 h-24 w-full" />
+                </div>
+              }
+            >
+              <DynamicNoteEditor
+                isOpen={isEditorOpen}
+                onOpenChange={handleCloseEditor}
+                videoId={activeVideoKey}
+                playlistId={playlist.id}
+                playerRef={playerRef}
+              />
+            </Suspense>
             <div className="max-h-[50vh] overflow-y-auto pr-1 md:max-h-[60vh]">
               <NoteList
                 videoId={activeVideoKey}
@@ -330,10 +389,19 @@ export default function PlayerPage() {
             </div>
           </TabsContent>
           <TabsContent value="summary" className="mt-4">
-            <VideoSummary
-              videoId={activeVideoKey ?? ""}
-              initialSummary={activeVideo?.aiSummary}
-            />
+            <Suspense
+              fallback={
+                <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="mt-3 h-20 w-full" />
+                </div>
+              }
+            >
+              <DynamicVideoSummary
+                videoId={activeVideoKey ?? ""}
+                initialSummary={activeVideo?.aiSummary}
+              />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>
