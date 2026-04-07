@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "rea
 import { useRouter } from "next/navigation"
 import YouTube from "react-youtube"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import confetti from "canvas-confetti"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -359,11 +358,13 @@ export function VideoPlayer({
   }
 
   const handleCompletionCelebration = () => {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-    })
+    void import("canvas-confetti").then(({ default: confetti }) =>
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+      })
+    )
   }
 
   useEffect(() => {

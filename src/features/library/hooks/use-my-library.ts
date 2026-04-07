@@ -10,6 +10,7 @@ export const useMyLibrary = () => {
     queryKey: ["my-library"],
     queryFn: () => LibraryService.getMyLibrary(),
     staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   })
 

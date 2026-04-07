@@ -6,14 +6,27 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 import { Menu } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { cn } from "@/lib/utils"
 import { navItems } from "./nav-items"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { LibraryService } from "@/features/library/services/library.service"
 
 export function DrawerSidebar() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const queryClient = useQueryClient()
+
+  const handlePrefetch = (href: string) => {
+    if (href === "/library") {
+      void queryClient.prefetchQuery({
+        queryKey: ["my-library"],
+        queryFn: () => LibraryService.getMyLibrary(),
+        staleTime: 1000 * 60 * 10,
+      })
+    }
+  }
 
   useEffect(() => {
     if (open) setOpen(false)
@@ -64,6 +77,7 @@ export function DrawerSidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      onMouseEnter={() => handlePrefetch(item.href)}
                       className={cn(
                         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600",
                         isActive &&
