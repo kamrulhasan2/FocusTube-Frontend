@@ -11,9 +11,9 @@ FocusTube transforms any YouTube playlist into a structured, distraction-free co
 
 ## Screenshots
 
-- Library: `public/screenshots/library.png`
-- Player Room: `public/screenshots/player-room.png`
-- Notes UI: `public/screenshots/notes-ui.png`
+- Library:  ![Library](public/screenshots/library.png)
+- Player Room:  ![Player Room](public/screenshots/player-room.png)
+- Notes UI:  ![Notes UI](public/screenshots/notes-ui.png)
 
 ## Features
 - AI Summaries for rapid retention and review
