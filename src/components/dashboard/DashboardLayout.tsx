@@ -1,7 +1,6 @@
-import { ReactNode, Suspense } from "react";
+import { ReactNode } from "react"
 
-import { Navbar } from "./Navbar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Navbar } from "./Navbar"
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -23,5 +22,5 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {children}
       </main>
     </div>
-  );
+  )
 }

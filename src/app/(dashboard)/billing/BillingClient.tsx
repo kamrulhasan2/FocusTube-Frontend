@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { BillingHistory } from "@/features/billing/components/BillingHistory"
 import { PricingTable } from "@/features/billing/components/PricingTable"
 
-export default function BillingClient() {
+export function BillingClient() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const queryClient = useQueryClient()
