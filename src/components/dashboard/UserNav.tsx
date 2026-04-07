@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LogOut, Settings, UserCircle, CreditCard } from "lucide-react";
 
@@ -51,10 +52,12 @@ export function UserNav() {
         >
           <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-600/20 text-xs font-semibold text-white">
             {user?.avatar ? (
-              <img
+              <Image
                 src={user.avatar}
                 alt={user?.name ?? "User avatar"}
-                className="h-full w-full object-cover"
+                width={32}
+                height={32}
+                className="h-full w-full rounded-full object-cover"
               />
             ) : (
               <span>{initials}</span>

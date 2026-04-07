@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  compress: true,
+  cacheComponents: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   allowedDevOrigins: [
     "http://localhost:3000",
     "http://192.168.0.102:3000",
@@ -11,6 +17,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "i.ytimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.backblazeb2.com",
       },
     ],
   },

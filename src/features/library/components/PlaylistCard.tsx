@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { CheckCircle, PlayCircle, Trash2 } from "lucide-react"
-import confetti from "canvas-confetti"
 import { toast } from "sonner"
 
 import { Progress } from "@/components/ui/progress"
@@ -109,11 +108,13 @@ export function PlaylistCard({ playlist, priorityImage }: PlaylistCardProps) {
   useEffect(() => {
     if (progressValue === 100 && !celebrateRef.current) {
       celebrateRef.current = true
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-      })
+      void import("canvas-confetti").then(({ default: confetti }) =>
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+        })
+      )
     }
     if (progressValue < 100) {
       celebrateRef.current = false

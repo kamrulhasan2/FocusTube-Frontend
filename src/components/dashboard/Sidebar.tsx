@@ -3,12 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { cn } from "@/lib/utils";
 import { navItems } from "./nav-items";
+import { LibraryService } from "@/features/library/services/library.service";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = (href: string) => {
+    if (href === "/library") {
+      void queryClient.prefetchQuery({
+        queryKey: ["my-library"],
+        queryFn: () => LibraryService.getMyLibrary(),
+        staleTime: 1000 * 60 * 10,
+      });
+    }
+  };
 
   return (
     <aside className="hidden h-screen w-[260px] shrink-0 border-r border-white/10 bg-slate-950 md:flex md:flex-col md:sticky md:top-0">
@@ -38,6 +51,7 @@ export function Sidebar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onMouseEnter={() => handlePrefetch(item.href)}
                   className={cn(
                     "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600",
                     isActive &&
