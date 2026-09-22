@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import N8nChatWidgetWrapper from "@/components/shared/N8nChatWidgetWrapper";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -74,6 +75,7 @@ export default function RootLayout({
       >
         <QueryProvider>{children}</QueryProvider>
         <Toaster theme="dark" position="bottom-right" />
+        <N8nChatWidgetWrapper />
       </body>
     </html>
   );
